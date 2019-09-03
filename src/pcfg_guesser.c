@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
 	if (parse_command_line(argc, argv, &program_info) != 0) {
 		printf("Error, parsing command line. Exiting\n");
 	}
+    
+    print_banner(program_info);
 	
 	return 0;
 }

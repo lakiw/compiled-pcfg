@@ -24,12 +24,13 @@
 //
 
 
-#ifndef _PCFG_GUESSER_H
-#define _PCFG_GUESSER_H
+#ifndef _BANNER_INFO_H
+#define _BANNER_INFO_H
 
-#include <stdio.h>
 #include "command_line.h"
-#include "banner_info.h"
+
+// Prints the banner
+extern void print_banner(struct program_info program_info);
 
 #endif
 

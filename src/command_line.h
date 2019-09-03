@@ -36,6 +36,7 @@
 struct program_info {
     int debug;                // The -d flag
     char *rule_name;          // The rule name, -r
+    char *version;
 };
 
 
