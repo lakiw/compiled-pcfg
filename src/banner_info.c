@@ -25,10 +25,9 @@
 
 #include "banner_info.h"
 
-
-void print_banner(struct program_info program_info) {
-	
-    fprintf(stderr,"TEMP BANNER GOES HERE\n");
+// Prints out a startup banner_info
+//
+void print_banner(char *version) {
     
     fprintf(stderr,"    ____            __  __           ______            __              \n");
     fprintf(stderr,"   / __ \\________  / /_/ /___  __   / ____/___  ____  / /              \n");
@@ -41,7 +40,7 @@ void print_banner(struct program_info program_info) {
     fprintf(stderr,"/_/    /__,_/ /___//__/\\__, /   \\____/\\__,_/\\___/____/____/\\___/_/     \n");
     fprintf(stderr,"                         /_/                                           \n");
     fprintf(stderr," ---------------------------> PURE C EDITION!!!                       \n");
-    fprintf(stderr,"Version: %s\n", program_info.version);
+    fprintf(stderr,"Version: %s\n", version);
     
     return;
 }

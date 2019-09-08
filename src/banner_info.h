@@ -27,10 +27,10 @@
 #ifndef _BANNER_INFO_H
 #define _BANNER_INFO_H
 
-#include "command_line.h"
+#include <stdio.h>
 
 // Prints the banner
-extern void print_banner(struct program_info program_info);
+extern void print_banner(char *version);
 
 #endif
 

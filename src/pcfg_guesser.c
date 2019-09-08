@@ -32,11 +32,21 @@ int main(int argc, char *argv[]) {
 	// Holds the info from the command line
 	struct program_info program_info;
 
+    // Parse the command line
 	if (parse_command_line(argc, argv, &program_info) != 0) {
-		printf("Error, parsing command line. Exiting\n");
+		fprintf(stderr, "Error, parsing command line. Exiting\n");
+        return 0;
 	}
     
-    print_banner(program_info);
-	
+    // Print the startup banner
+    print_banner(program_info.version);
+    
+    // Read the rules filelength
+    char result[MAX_CONFIG_LINE];
+    if (get_key("Rules/Default/config.ini", "BASE_A", "filenames", result) != 0) {
+        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        return 0;
+	}
+    
 	return 0;
 }

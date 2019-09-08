@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include "command_line.h"
 #include "banner_info.h"
+#include "config_parser.h"
 
 #endif
 

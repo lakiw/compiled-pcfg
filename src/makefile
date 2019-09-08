@@ -129,8 +129,8 @@ LFLAGS_NATIVE           += -lws2_32
 endif # MSYS2
 
 
-pcfg_guesser: src/pcfg_guesser.o src/command_line.o src/tty.o src/banner_info.o
-	$(CC) $(CFLAGS_NATIVE) src/pcfg_guesser.o src/tty.o src/command_line.o src/banner_info.o -O3 -o pcfg_guesser
+pcfg_guesser: src/pcfg_guesser.o src/command_line.o src/tty.o src/banner_info.o src/config_parser.o
+	$(CC) $(CFLAGS_NATIVE) src/pcfg_guesser.o src/tty.o src/command_line.o src/banner_info.o src/config_parser.o -O3 -o pcfg_guesser
 	
 pcfg_guesser.o: src/pcfg_guesser.c
 	$(CC) $(CFLAGS_NATIVE) -c src/pcfg_guesser.c
@@ -143,6 +143,9 @@ command_line.o: src/command_line.c
     
 banner_info.o: src/banner_info.c
 	$(CC) $(CFLAGS_NATIVE) -c src/banner_info.c
+
+config_parser.o: src/config_parser.c
+	$(CC) $(CFLAGS_NATIVE) -c src/config_parser.c
 
 main: pcfg_guesser
 
