@@ -26,8 +26,92 @@
 #include "config_parser.h"
 
 
+// Gets a list from a section/key combo from a config file and stores an array
+// of strings in result. The number of strings found is passed back in
+// the list_size int.
+//
+// Disclaimer, doesn't handle escaped """ quotes, as that wasn't necessary
+// for my use-case
+//
+// Function returns a non-zero value if an error occurs
+//     1 = problem opening the file
+//     2 = could not find the key
+//     3 = key not a list
+int config_get_list(char *filename, char *section, char *key, char result[][MAX_CONFIG_ITEM], int *list_size, int max_items) {
+    
+    // Holds the full unformatted string result of looking up the section/key
+    char raw_result[MAX_CONFIG_LINE];
+
+    // Grab the unformatted string from the section/key combo
+    int ret_value = get_key(filename, section, key, raw_result);
+    
+    // Check to make sure we were able to grab the data
+    // If not, return the error value
+    if (ret_value != 0) {
+        return ret_value;
+    }
+    
+    // Get the length of the buffer we will be parsing
+    int raw_len = strnlen(raw_result, MAX_CONFIG_LINE);
+    
+    // Quick exit if the item is too small to be a list
+    if (raw_len < 2) {
+        return 3;
+    }
+    
+    // Quick exit if the item is not enclosed in brackets
+    if (raw_result[0] != '[' || raw_result[raw_len-1] != ']') {
+        return 3;
+    }
+    
+    //the start of the raw string we'll be saving. -1 if not started
+    int raw_string_start = -1;
+
+    // Start parsing the raw results for strings
+    // Skipping the brackets at the start/end of the list
+    for (int raw_pos = 1; raw_pos < raw_len -1; raw_pos++) {
+        
+        // It is either the start or end of a new item
+        if (raw_result[raw_pos] == '"') {
+            // It is the start of an item
+            if (raw_string_start == -1) {
+                // Making it +1 so we don't copy the "
+                raw_string_start = raw_pos + 1;
+            }
+            // It is the end of an item
+            else {
+                
+                // Check to make sure there is space to copy the next item
+                if ((*list_size) == max_items) {
+                    return 3;
+                }
+                // Copy the string to the position in the array
+                strncpy(result[(*list_size)], raw_result + raw_string_start, raw_pos - raw_string_start);
+                
+                //Reset the pointer to the start to say we are not processing
+                //any items now
+                raw_string_start = -1;
+                
+                //Increse the list size to point to the next free spot
+                (*list_size) = (*list_size) + 1;
+            }
+        }
+    }       
+    
+    // Sanity check to make sure the last item wasn't an unescaped "
+    if (raw_string_start != -1) {
+        return 3;
+    }
+    
+    return 0;
+}    
+
+
 // Gets the value from a key and returns it as a string in result var
 // Function returns a non-zero value if an error occurs
+//     1 = problem opening the file
+//     2 = could not find the key
+//
 int get_key(char *filename, char *section, char *key, char *result) {
     
     // Pointer to the open config file
@@ -81,7 +165,6 @@ int get_key(char *filename, char *section, char *key, char *result) {
             // we don't have to deal with different types of newlines
             if (strncmp(section_name, buff, section_len) == 0) {
                 found_section = 1;
-                printf("Found %s\n", section_name);
             }            
         }
         
@@ -96,12 +179,12 @@ int get_key(char *filename, char *section, char *key, char *result) {
                 
                 //strip off the trailing newlines and return success
                 int result_len = strnlen(result,MAX_CONFIG_LINE);
-                result[result_len-1] = '\0';
+                result[result_len-2] = '\0';
                 return 0;
             }
         }
     }
     
     // Did not find the key
-    return 1;
+    return 2;
 }

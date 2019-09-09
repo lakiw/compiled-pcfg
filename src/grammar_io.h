@@ -23,27 +23,14 @@
 //
 //
 
-#ifndef _CONFIG_PARSER_H
-#define _CONFIG_PARSER_H
 
-#include <stdio.h>
-#include <string.h>
+#ifndef _GRAMMAR_IO_H
+#define _GRAMMAR_IO_H
+
+#include "config_parser.h"
 
 
-// The maximum length of a config line to parse
-#define MAX_CONFIG_LINE 8224
-
-// The maximum length of a config line item
-#define MAX_CONFIG_ITEM 256
-
-// Gets a list from a section/key combo from a config file and stores an array
-// of strings in result.
-//
-// Function returns a non-zero value if an error occurs
-extern int config_get_list(char *filename, char *section, char *key, char result[][MAX_CONFIG_ITEM], int *list_size, int max_items); 
-
-// Gets a keyvalue are return it as a string
-// returns a non-zero value if an error occurs
-extern int get_key(char *filename, char *section, char *key, char *result);
+// Loads a grammar ruleset
+extern int load_grammar(char *rule_name);
 
 #endif

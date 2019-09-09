@@ -41,12 +41,7 @@ int main(int argc, char *argv[]) {
     // Print the startup banner
     print_banner(program_info.version);
     
-    // Read the rules filelength
-    char result[MAX_CONFIG_LINE];
-    if (get_key("Rules/Default/config.ini", "BASE_A", "filenames", result) != 0) {
-        fprintf(stderr, "Error reading the rules file. Exiting\n");
-        return 0;
-	}
+    load_grammar("Default");
     
 	return 0;
 }

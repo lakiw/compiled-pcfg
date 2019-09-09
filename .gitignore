@@ -10,6 +10,7 @@ venv.bak/
 
 #Object files
 *.o
+*.a
 
 #Built executables
 pcfg_guesser
