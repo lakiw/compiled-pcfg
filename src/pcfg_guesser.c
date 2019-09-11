@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     // Print the startup banner
     print_banner(program_info.version);
     
-    load_grammar("Default");
+    load_grammar(argv[0], program_info);
     
 	return 0;
 }

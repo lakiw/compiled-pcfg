@@ -80,6 +80,7 @@ int parse_command_line(int argc, char **argv, struct program_info *program_info)
     program_info->rule_name = "Default";
     program_info->debug = 0;
     program_info->version = VERSION;
+    program_info->min_supported_version = MIN_SUPPORTED_VERSION;
     
     argp_parse(&argp, argc, argv, 0, 0, program_info);
     

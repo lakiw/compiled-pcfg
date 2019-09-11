@@ -129,8 +129,8 @@ LFLAGS_NATIVE           += -lws2_32
 endif # MSYS2
 
 
-pcfg_guesser: src/pcfg_guesser.o src/command_line.o src/tty.o src/banner_info.o src/grammar_io.a
-	$(CC) $(CFLAGS_NATIVE) src/pcfg_guesser.o src/tty.o src/command_line.o src/banner_info.o src/grammar_io.a -O3 -o pcfg_guesser
+pcfg_guesser: src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/grammar_io.o src/config_parser.o
+	$(CC) $(CFLAGS_NATIVE) src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/config_parser.o src/grammar_io.o -O3 -o pcfg_guesser
 	
 pcfg_guesser.o: src/pcfg_guesser.c src/pcfg_guesser.h
 	$(CC) $(CFLAGS_NATIVE) -c src/pcfg_guesser.c
@@ -138,14 +138,11 @@ pcfg_guesser.o: src/pcfg_guesser.c src/pcfg_guesser.h
 tty.o: src/tty.c src/tty.h
 	$(CC) $(CFLAGS_NATIVE) -c src/tty.c
 	
-command_line.o: src/command_line.c src/command_line.h
-	$(CC) $(CFLAGS_NATIVE) -c src/command_line.c
-    
 banner_info.o: src/banner_info.c src/bannar_info.h
 	$(CC) $(CFLAGS_NATIVE) -c src/banner_info.c
-
-src/grammar_io.a: src/grammar_io.o src/config_parser.o
-	ar rcs src/grammar_io.a src/grammar_io.o src/config_parser.o
+	
+command_line.o: src/command_line.c src/command_line.h
+	$(CC) $(CFLAGS_NATIVE) -c src/command_line.c
 
 grammar_io.o: src/grammar_io.c src/grammar_io.h
 	$(CC) $(CFLAGS_NATIVE) -c src/grammar_io.c 

@@ -27,10 +27,24 @@
 #ifndef _GRAMMAR_IO_H
 #define _GRAMMAR_IO_H
 
-#include "config_parser.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "config_parser.h"
+#include "command_line.h"
+
+// Handle specifics for path info for Windows vs. Linux
+#ifdef _WIN32
+    define PATH_MAX 256
+    #define SLASH '\\'
+#else
+    #include <limits.h>
+    #define SLASH '/'
+#endif
 
 // Loads a grammar ruleset
-extern int load_grammar(char *rule_name);
+extern int load_grammar(char *arg_exec, struct program_info program_info);
+
 
 #endif
