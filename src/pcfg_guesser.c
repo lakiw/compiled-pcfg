@@ -41,7 +41,10 @@ int main(int argc, char *argv[]) {
     // Print the startup banner
     print_banner(program_info.version);
     
-    load_grammar(argv[0], program_info);
+    // Create the empty grammar
+    PcfgGrammar pcfg;
+    
+    load_grammar(argv[0], program_info, &pcfg);
     
 	return 0;
 }

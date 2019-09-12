@@ -33,10 +33,11 @@
 
 #include "config_parser.h"
 #include "command_line.h"
+#include "grammar.h"
 
 // Handle specifics for path info for Windows vs. Linux
 #ifdef _WIN32
-    define PATH_MAX 256
+    #define PATH_MAX 256
     #define SLASH '\\'
 #else
     #include <limits.h>
@@ -44,7 +45,7 @@
 #endif
 
 // Loads a grammar ruleset
-extern int load_grammar(char *arg_exec, struct program_info program_info);
+extern int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *pcfg);
 
 
 #endif

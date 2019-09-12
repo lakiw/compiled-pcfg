@@ -31,6 +31,7 @@
 #include "command_line.h"
 #include "banner_info.h"
 #include "grammar_io.h"
+#include "grammar.h"
 
 #endif
 

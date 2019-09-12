@@ -132,7 +132,7 @@ endif # MSYS2
 pcfg_guesser: src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/grammar_io.o src/config_parser.o
 	$(CC) $(CFLAGS_NATIVE) src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/config_parser.o src/grammar_io.o -O3 -o pcfg_guesser
 	
-pcfg_guesser.o: src/pcfg_guesser.c src/pcfg_guesser.h
+pcfg_guesser.o: src/pcfg_guesser.c src/pcfg_guesser.h src/grammar.h
 	$(CC) $(CFLAGS_NATIVE) -c src/pcfg_guesser.c
 	
 tty.o: src/tty.c src/tty.h
@@ -144,7 +144,7 @@ banner_info.o: src/banner_info.c src/bannar_info.h
 command_line.o: src/command_line.c src/command_line.h
 	$(CC) $(CFLAGS_NATIVE) -c src/command_line.c
 
-grammar_io.o: src/grammar_io.c src/grammar_io.h
+grammar_io.o: src/grammar_io.c src/grammar_io.h src/grammar.h
 	$(CC) $(CFLAGS_NATIVE) -c src/grammar_io.c 
 
 config_parser.o: src/config_parser.c src/config_parser.h

@@ -91,7 +91,7 @@ int load_terminal(char *config_filename, char *structure) {
 //     2 = malformed ruleset
 //     3 = unsupported feature/ruleset
 //
-int load_grammar(char *arg_exec, struct program_info program_info) {
+int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *pcfg) {
     
     // Directory the executable is running in
     // Adding in a plus 1 to PATH_MAX to deal with a potential edge case
