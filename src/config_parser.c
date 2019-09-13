@@ -180,11 +180,13 @@ int get_key(char *filename, char *section, char *key, char *result) {
                 //strip off the trailing newlines and return success
                 int result_len = strnlen(result,MAX_CONFIG_LINE);
                 result[result_len-2] = '\0';
+                fclose(config);
                 return 0;
             }
         }
     }
     
     // Did not find the key
+    fclose(config);
     return 2;
 }

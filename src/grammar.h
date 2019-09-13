@@ -29,9 +29,7 @@
 
 
 // The maximum length of a terminal. Aka D32
-// Needs to be one more than the desired length since the index starts at 0,
-// and I don't want to have to fix-up the D32 = D31 when using this
-#define MAX_TERM_LENGTH 33
+#define MAX_TERM_LENGTH 32
 
 
 // Contains the replacements that all have the same probabability
@@ -51,7 +49,7 @@ typedef struct PcfgReplacements {
     struct PcfgReplacements *child;
     
     // The values for this terminal
-    char *value[][MAX_TERM_LENGTH];
+    char *value[][MAX_TERM_LENGTH + 1];
         
 }PcfgReplacements;
 
@@ -59,14 +57,14 @@ typedef struct PcfgReplacements {
 // Top level structure that contains the PCFG
 typedef struct PcfgGrammar {
    
-    PcfgReplacements *a[MAX_TERM_LENGTH];
-    PcfgReplacements *d[MAX_TERM_LENGTH];
-    PcfgReplacements *o[MAX_TERM_LENGTH][MAX_TERM_LENGTH];
-    PcfgReplacements *k[MAX_TERM_LENGTH];
-    PcfgReplacements *x[MAX_TERM_LENGTH];
-    PcfgReplacements *y[MAX_TERM_LENGTH];
-    PcfgReplacements *c[MAX_TERM_LENGTH];
-    PcfgReplacements *m[MAX_TERM_LENGTH];
+    PcfgReplacements *a[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *d[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *o[MAX_TERM_LENGTH + 1 ];
+    PcfgReplacements *k[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *x[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *y[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *c[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *m[MAX_TERM_LENGTH + 1];
     
 }PcfgGrammar;
 

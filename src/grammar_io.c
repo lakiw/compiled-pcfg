@@ -64,21 +64,171 @@ int check_encoding(char *config_filename) {
     return 3;
 }
 
+// Splits a terminal file into a value, prob pair
+//
+// Input: Note, memory needs to be allocated by the calling program
+//
+//     input: the string that needs to be split_value
+//
+//     value: contains the return value string (must be allocated by calling program)
+//
+//     prob: contains the probability from the split value (must be allocated by calling program)
+//
+// Function returns a non-zero value if an error occurs
+//     1 = Problem splitting the input
+//
+int split_value(char *input, char *value, double *prob) {
+    
+    //find the split point
+    char *split_point = strchr(input,'\t');
+        
+    //If there isn't a tab to split the input up
+    if (split_point == NULL) {
+        return 1;
+    }
+        
+    (*prob) = strtod(split_point,NULL);
+        
+    // Check to make sure it was a number
+    if ((errno == EINVAL) || (errno == ERANGE))
+    {
+        fprintf(stderr, "Invalid probability found. Exiting\n");
+        return 1;
+    }
+     
+    // Make sure the id falls within the acceptable range
+    if ( ((*prob) < 0.0) || ((*prob) > 1.0) ) {
+        fprintf(stderr, "Invalid probability found in rules. Exiting\n");
+        return 1;
+    }      
+
+    //Assign the value
+    strncpy(value, input, split_point-input);
+    value[split_point-input] = '\0';
+
+    //print the length of the first items
+    //printf("Length:%li Value:%s Prob: %E\n",split_point-input, value, (*prob));
+    
+    //char str[100];
+    //int result = scanf("%s", str);
+    
+    return 0;
+}
+
+// Opens a file and actually loads the grammar for a particular terminal
+//
+// Function returns a non-zero value if an error occurs
+//     1 = problem opening the file or malformed ruleset
+//
+int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
+    
+    // Pointer to the open terminal file
+    FILE *fp;
+    
+    // Open the terminal file
+    fp= fopen(filename,"r");
+    
+    // Check to make sure the file opened correctly
+    if (fp== NULL) {
+        
+        //Could not open the file. Print error and return an error
+        fprintf(stderr, "Error. Could not read the file: %s\n",filename);
+        return 1;
+    }
+    
+    // Note: There will be two passes through the file
+    //   1) First pass gets count info since I want to allocate memory without
+    //      being wasteful, and I want to use arrays to hopefully make
+    //      generating guesses faster
+    //
+    //   2) Actually load the terminals to the pcfgreplacement struct
+    //
+    
+    // This contains the number of items at the current probability
+    int num_term = 0;
+    
+    // Holds the current line in the config file
+    char buff[MAX_CONFIG_LINE];
+    
+    // Holds the temporary values
+     
+    // Loop through the config file
+    while (fgets(buff, MAX_CONFIG_LINE , (FILE*)fp)) {
+        double prob;
+        char value[MAX_CONFIG_LINE];
+        
+        if (split_value(buff, value, &prob) != 0) {
+            return 1;
+        }
+        
+    }
+    
+    return 0;
+}
+
 
 // Loads the grammar for a particular terminal
 //
 // Function returns a non-zero value if an error occurs
 //     1 = problem opening the file or malformed ruleset
 //
-int load_terminal(char *config_filename, char *structure) {
+int load_terminal(char *config_filename, char *base_directory, char *structure, PcfgReplacements *grammar_item[]) {
+    
+    // Get the folder where the files will be saved
+    char section_folder[MAX_CONFIG_LINE];
+    
+    if (get_key(config_filename, structure, "directory", section_folder) != 0) {
+        fprintf(stderr, "Could not get folder name for section. Exiting\n");
+        return 1;
+    }
     
     // Get the filenames associated with the structure
     char result[256][MAX_CONFIG_ITEM];
     int list_size;
     if (config_get_list(config_filename, structure, "filenames", result, &list_size, 256) != 0) {
-        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        fprintf(stderr, "Error reading the config for a rules file. Exiting\n");
         return 1;
 	}
+    
+    //Load each of the files
+    for (int i = 0; i< list_size; i++) {
+
+        //Find the id for this file, aka A1 vs A23. This is the 1, or 23
+        char *end_pos = strchr(result[i],'.');
+        
+        //If there isn't a .txt, this is an invalid file
+        if (end_pos == NULL) {
+            return 1;
+        }
+        
+        long id = strtol(result[i],&end_pos, 10);
+        
+        // Check to make sure it was a number
+        if ((errno == EINVAL) || (errno == ERANGE))
+        {
+            fprintf(stderr, "Invalid File name found in rules. Exiting\n");
+            return 1;
+        }
+         
+        // Make sure the id falls within the acceptable range
+        if (id <= 0) {
+            fprintf(stderr, "Invalid File name found in rules. Exiting\n");
+            return 1;
+        }      
+
+        // Make sure the value isn't too long for the current compiled pcfg_guesser
+        if (id > MAX_TERM_LENGTH) {
+            continue;
+        }
+        
+        char filename[PATH_MAX];
+        snprintf(filename, PATH_MAX, "%s%s%c%s", base_directory,section_folder,SLASH,result[i]);
+        printf("%s\n",filename);
+        if (load_term_from_file(filename, grammar_item[id]) != 0) {
+            return 1;
+        }
+
+    }
 
     return 0;
 }
@@ -117,7 +267,7 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
     
     // Create the base directory to load the rules from
     char base_directory[FILENAME_MAX];
-    snprintf(base_directory, FILENAME_MAX, "%s%cRules%c%s%c", exec_directory, SLASH, SLASH, program_info.rule_name, SLASH);
+    snprintf(base_directory, FILENAME_MAX, "%sRules%c%s%c", exec_directory,  SLASH, program_info.rule_name, SLASH);
     
     fprintf(stderr, "Loading Ruleset:%s\n",base_directory);
     
@@ -138,7 +288,7 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
     // Read the rules filelength
     char result[256][MAX_CONFIG_ITEM];
     int list_size;
-    if (load_terminal(config_filename, "BASE_A") != 0) {
+    if (load_terminal(config_filename, base_directory, "BASE_A", pcfg->a) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
