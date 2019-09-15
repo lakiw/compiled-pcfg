@@ -40,7 +40,7 @@ typedef struct PcfgReplacements {
     int size;
     
     // The probabilities for this terminal
-    float prob;
+    double prob;
     
     // The parent of this replacement group
     struct PcfgReplacements *parent;
@@ -49,7 +49,7 @@ typedef struct PcfgReplacements {
     struct PcfgReplacements *child;
     
     // The values for this terminal
-    char *value[][MAX_TERM_LENGTH + 1];
+    char **value;
         
 }PcfgReplacements;
 
@@ -57,14 +57,14 @@ typedef struct PcfgReplacements {
 // Top level structure that contains the PCFG
 typedef struct PcfgGrammar {
    
-    PcfgReplacements *a[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *d[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *o[MAX_TERM_LENGTH + 1 ];
-    PcfgReplacements *k[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *alpha[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *digits[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *other[MAX_TERM_LENGTH + 1 ];
+    PcfgReplacements *keyboard[MAX_TERM_LENGTH + 1];
     PcfgReplacements *x[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *y[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *c[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *m[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *years[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *capitalization[MAX_TERM_LENGTH + 1];
+    PcfgReplacements *markov[MAX_TERM_LENGTH + 1];
     
 }PcfgGrammar;
 

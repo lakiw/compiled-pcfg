@@ -45,6 +45,9 @@ int config_get_list(char *filename, char *section, char *key, char result[][MAX_
     // Grab the unformatted string from the section/key combo
     int ret_value = get_key(filename, section, key, raw_result);
     
+    // Initialize list_size
+    (*list_size) = 0;
+    
     // Check to make sure we were able to grab the data
     // If not, return the error value
     if (ret_value != 0) {
@@ -87,6 +90,7 @@ int config_get_list(char *filename, char *section, char *key, char result[][MAX_
                 }
                 // Copy the string to the position in the array
                 strncpy(result[(*list_size)], raw_result + raw_string_start, raw_pos - raw_string_start);
+                result[(*list_size)][raw_pos - raw_string_start] = '\0';
                 
                 //Reset the pointer to the start to say we are not processing
                 //any items now

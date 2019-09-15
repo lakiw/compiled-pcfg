@@ -105,15 +105,10 @@ int split_value(char *input, char *value, double *prob) {
     //Assign the value
     strncpy(value, input, split_point-input);
     value[split_point-input] = '\0';
-
-    //print the length of the first items
-    //printf("Length:%li Value:%s Prob: %E\n",split_point-input, value, (*prob));
-    
-    //char str[100];
-    //int result = scanf("%s", str);
     
     return 0;
 }
+
 
 // Opens a file and actually loads the grammar for a particular terminal
 //
@@ -144,22 +139,122 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
     //   2) Actually load the terminals to the pcfgreplacement struct
     //
     
-    // This contains the number of items at the current probability
-    int num_term = 0;
-    
     // Holds the current line in the config file
     char buff[MAX_CONFIG_LINE];
     
-    // Holds the temporary values
+    // Initalize things and get the first line of the file
+    if (!fgets(buff, MAX_CONFIG_LINE , (FILE*)fp)) {
+        // The file should have at least one line in it
+        return 1;
+    }
+    
+    // This contains the number of items at the current probability
+    int num_term = 1;
+    
+    // The previous probability we saw
+    double previous_prob;
+    
+    // The probability of the current item;
+    double prob;
+    
      
+    // A temp holder for the string value in the file
+    char value[MAX_CONFIG_LINE];
+    
+    
+    // Break up the first line. Using previous_prob since this will be the
+    // inital value for it when comparing against other items.
+    if (split_value(buff, value, &previous_prob) != 0) {
+        return 1;
+    }
+    
+    // Initalize the first PcfgReplacement
+    if ((terminal_pointer = malloc(sizeof(struct PcfgReplacements))) == NULL) {
+        return 1;
+    } 
+    terminal_pointer->parent = NULL;
+    terminal_pointer->child = NULL;
+    terminal_pointer->prob = previous_prob;
+    
+    PcfgReplacements *cur_pointer = terminal_pointer;
+        
     // Loop through the config file
     while (fgets(buff, MAX_CONFIG_LINE , (FILE*)fp)) {
-        double prob;
-        char value[MAX_CONFIG_LINE];
         
         if (split_value(buff, value, &prob) != 0) {
             return 1;
         }
+        
+        if (prob == previous_prob) {
+            num_term++;
+        }
+        else {
+            // Finalize this structure
+            cur_pointer->size = num_term;
+            if ((cur_pointer->value = (char **) malloc(num_term * sizeof(char *))) == NULL) {
+                return 1;
+            }
+
+            // intialize the next, and make it current
+            previous_prob = prob;
+            num_term = 1;
+            
+            cur_pointer->child = malloc(sizeof(struct PcfgReplacements));
+            if (cur_pointer->child == NULL) {
+                return 1;
+            }
+            
+            cur_pointer->child->parent = cur_pointer;
+            cur_pointer = cur_pointer->child;
+            cur_pointer->child = NULL;
+            cur_pointer->prob = prob;
+        }
+    }
+    
+    //Save the size of the last items
+    cur_pointer->size = num_term;
+    if ((cur_pointer->value = (char **) malloc(num_term * sizeof(char *))) == NULL) {
+        return 1;
+    }
+    
+    // Now on to the second loop where we will save all of the items
+    
+    // Reset the file pointer to the start of the file
+    if (fseek(fp, 0, SEEK_SET) != 0) {
+        fprintf(stderr, "Error. Could not seek in: %s\n",filename);
+        return 1;
+    }
+    cur_pointer = terminal_pointer;
+    num_term = 0;
+    
+    while (fgets(buff, MAX_CONFIG_LINE , (FILE*)fp)) {
+        
+        // Advance to the next container if needed
+        if (num_term == cur_pointer->size) {
+            cur_pointer = cur_pointer->child;
+            num_term = 0;
+        }
+        
+        if (split_value(buff, value, &prob) != 0) {
+            fprintf(stderr, "Error. Could not split value in rules file\n");
+            return 1;
+        }
+        // Sanity checking
+        if (prob != cur_pointer->prob) {
+            fprintf(stderr, "Error. Probability mismatch in rules file\n");
+            return 1;
+        }
+        
+        // Save the actual value
+        int value_len = strnlen(value, MAX_CONFIG_LINE);
+
+        cur_pointer->value[num_term] = malloc((value_len +1) * sizeof(char *));
+        if (cur_pointer->value[num_term] == NULL) {
+            return 1;
+        }
+        strncpy(cur_pointer->value[num_term], value, value_len +1);
+        
+        num_term++;
         
     }
     
@@ -189,7 +284,7 @@ int load_terminal(char *config_filename, char *base_directory, char *structure, 
         fprintf(stderr, "Error reading the config for a rules file. Exiting\n");
         return 1;
 	}
-    
+
     //Load each of the files
     for (int i = 0; i< list_size; i++) {
 
@@ -223,7 +318,7 @@ int load_terminal(char *config_filename, char *base_directory, char *structure, 
         
         char filename[PATH_MAX];
         snprintf(filename, PATH_MAX, "%s%s%c%s", base_directory,section_folder,SLASH,result[i]);
-        printf("%s\n",filename);
+
         if (load_term_from_file(filename, grammar_item[id]) != 0) {
             return 1;
         }
@@ -285,13 +380,48 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
         return ret_value;
     }
     
-    // Read the rules filelength
-    char result[256][MAX_CONFIG_ITEM];
-    int list_size;
-    if (load_terminal(config_filename, base_directory, "BASE_A", pcfg->a) != 0) {
+    // Read in the alpha terminals
+    if (load_terminal(config_filename, base_directory, "BASE_A", pcfg->alpha) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
+    
+    // Read in the capitalization masks
+    if (load_terminal(config_filename, base_directory, "CAPITALIZATION", pcfg->capitalization) != 0) {
+        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        return 1;
+	}
+    
+    // Read in the digit terminals 
+    if (load_terminal(config_filename, base_directory, "BASE_D", pcfg->digits) != 0) {
+        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        return 1;
+	}
+    
+    // Read in the years terminals 
+    if (load_terminal(config_filename, base_directory, "BASE_Y", pcfg->years) != 0) {
+        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        return 1;
+	}
+    
+    // Read in the "other" terminals 
+    if (load_terminal(config_filename, base_directory, "BASE_O", pcfg->other) != 0) {
+        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        return 1;
+	}
+    
+    // Read in the conteXt sensitive terminals
+    if (load_terminal(config_filename, base_directory, "BASE_X", pcfg->x) != 0) {
+        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        return 1;
+	}
+    
+    // Read in the keyboard combo terminals
+    if (load_terminal(config_filename, base_directory, "BASE_K", pcfg->keyboard) != 0) {
+        fprintf(stderr, "Error reading the rules file. Exiting\n");
+        return 1;
+	}
+    
     
     return 0;
 }
