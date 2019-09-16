@@ -21,30 +21,21 @@
 //
 //
 
-
-#ifndef _GRAMMAR_IO_H
-#define _GRAMMAR_IO_H
+#ifndef _HELPER_IO_H
+#define _HELPER_IO_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "config_parser.h"
-#include "command_line.h"
-#include "helper_io.h"
-#include "grammar.h"
 
-// Handle specifics for path info for Windows vs. Linux
-#ifdef _WIN32
-    #define PATH_MAX 256
-    #define SLASH '\\'
-#else
-    #include <limits.h>
-    #define SLASH '/'
-#endif
 
-// Loads a grammar ruleset
-extern int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *pcfg);
+// Checks the encoding of a ruleset
+extern int check_encoding(char *config_filename);
 
+// Splits an input line into a value, prob pair
+extern int split_value(char *input, char *value, double *prob);
 
 #endif

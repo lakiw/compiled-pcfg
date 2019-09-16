@@ -54,6 +54,47 @@ typedef struct PcfgReplacements {
 }PcfgReplacements;
 
 
+// Contains info for a base structure on the individual replacement type. 
+//
+// Not using pointers here since I want to eventually add support for
+// multiple cracking modes, so this is intended to create a lookup table
+// and references are easier.
+//
+typedef struct BaseReplace{
+         
+    // The type of replacement
+    // Could get away with just a simple char since all the designators are
+    // currently 1 char long, but want to future proof this a little bit
+    char *type;
+    
+    // The id for this replacent. Aka the '3' in "D3"
+    int id;
+           
+}BaseReplace;
+
+
+// Contains the base structures
+//
+typedef struct PcfgBase {
+    
+    // The number of replacements in the structure
+    int size;
+    
+    // The probabilities for this base structure
+    double prob;
+    
+    // The parent of this base structure
+    struct PcfgBase *prev;
+    
+    // The child of this base structure
+    struct PcfgBase *next;
+    
+    // The replacements for this structure
+    BaseReplace *value;
+        
+}PcfgBase;
+
+
 // Top level structure that contains the PCFG
 typedef struct PcfgGrammar {
    
@@ -65,6 +106,7 @@ typedef struct PcfgGrammar {
     PcfgReplacements *years[MAX_TERM_LENGTH + 1];
     PcfgReplacements *capitalization[MAX_TERM_LENGTH + 1];
     PcfgReplacements *markov[MAX_TERM_LENGTH + 1];
+    PcfgBase *base_structures;
     
 }PcfgGrammar;
 

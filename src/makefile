@@ -129,8 +129,8 @@ LFLAGS_NATIVE           += -lws2_32
 endif # MSYS2
 
 
-pcfg_guesser: src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/grammar_io.o src/config_parser.o
-	$(CC) $(CFLAGS_NATIVE) src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/config_parser.o src/grammar_io.o -O3 -o pcfg_guesser
+pcfg_guesser: src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/grammar_io.o src/config_parser.o src/helper_io.o
+	$(CC) $(CFLAGS_NATIVE) src/pcfg_guesser.o src/tty.o src/banner_info.o src/command_line.o src/config_parser.o src/grammar_io.o src/helper_io.o -O3 -o pcfg_guesser
 	
 pcfg_guesser.o: src/pcfg_guesser.c src/pcfg_guesser.h src/grammar.h
 	$(CC) $(CFLAGS_NATIVE) -c src/pcfg_guesser.c
@@ -149,6 +149,9 @@ grammar_io.o: src/grammar_io.c src/grammar_io.h src/grammar.h
 
 config_parser.o: src/config_parser.c src/config_parser.h
 	$(CC) $(CFLAGS_NATIVE) -c src/config_parser.c
+	
+helper_io.o: src/helper_io.c src/helper_io.hashcat
+	$(CC) $(CFLAGS_NATIVE) -c src/helper_io.c
 
 main: pcfg_guesser
 
