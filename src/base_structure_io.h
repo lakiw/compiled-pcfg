@@ -21,31 +21,32 @@
 //
 //
 
-
-#ifndef _GRAMMAR_IO_H
-#define _GRAMMAR_IO_H
+#ifndef _BASE_STRUCTURE_IO_H
+#define _BASE_STRUCTURE_IO_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "config_parser.h"
-#include "command_line.h"
-#include "helper_io.h"
-#include "base_structure_io.h"
+#include <errno.h>
+#include <ctype.h>
 #include "grammar.h"
+#include "config_parser.h"
+#include "helper_io.h"
 
-// Handle specifics for path info for Windows vs. Linux
-#ifdef _WIN32
-    #define PATH_MAX 256
-    #define SLASH '\\'
-#else
-    #include <limits.h>
-    #define SLASH '/'
-#endif
 
-// Loads a grammar ruleset
-extern int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *pcfg);
+// Splits up a base structure string, and allocates an array of BaseReplace
+//
+// Aka turns A4D3 into C(4)->A(4)->D(3)
+//
+// Function returns a non-zero value if an error occurs
+//     1 = Base structuer not supported
+//     2 = Error occured processing the input
+//
+extern int split_base(char* input, BaseReplace* base, int *list_size);
+
+
+// Loads the grammar for base structures
+extern int load_base_structures(char *config_filename, char *base_directory, PcfgBase *base_structures); 
 
 
 #endif

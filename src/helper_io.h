@@ -32,6 +32,16 @@
 #include "config_parser.h"
 
 
+// Handle specifics for path info for Windows vs. Linux
+#ifdef _WIN32
+    #define PATH_MAX 256
+    #define SLASH '\\'
+#else
+    #include <limits.h>
+    #define SLASH '/'
+#endif
+
+
 // Checks the encoding of a ruleset
 extern int check_encoding(char *config_filename);
 
