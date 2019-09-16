@@ -4,6 +4,8 @@
 //  --Probabilistic Context Free Grammar (PCFG) Password Guessing Program
 //
 //  Written by Matt Weir
+//  Original backend priority queue code taken from stackexchange user arcomber
+//  https://codereview.stackexchange.com/questions/186670/priority-queue-implementation-in-c-based-on-heap-ordered-resizable-array-tak
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,22 +23,28 @@
 //
 //
 
+#ifndef _PCFG_PQUEUE_H
+#define _PCFG_PQUEUE_H
 
-#ifndef _GRAMMAR_IO_H
-#define _GRAMMAR_IO_H
-
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "config_parser.h"
-#include "command_line.h"
-#include "helper_io.h"
-#include "base_structure_io.h"
-#include "grammar.h"
 
-// Loads a grammar ruleset
-extern int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *pcfg);
+typedef struct {
+    int weight;
+    char* data;
+} element;
+
+
+typedef struct {
+    int vertex;
+    int weight;
+} edge;
+
+
+extern int descending(const void* a, const void* b);
+
+
+extern int ascending(const void* a, const void* b);
 
 
 #endif

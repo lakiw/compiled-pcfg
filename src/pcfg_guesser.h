@@ -32,6 +32,8 @@
 #include "banner_info.h"
 #include "grammar_io.h"
 #include "grammar.h"
+#include "pqueue.h"
+#include "pcfg_pqueue.h"
 
 #endif
 
