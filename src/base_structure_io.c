@@ -32,7 +32,7 @@
 //     1 = Base structuer not supported
 //     2 = Error occured processing the input
 //
-int split_base(char* input, BaseReplace* base, int *list_size) {
+int split_base(char* input, BaseReplace **base, int *list_size) {
     
     // Do two passes through the data. First finds the number of items
     // and then allocates the memory to store them. Also checks to make sure
@@ -166,8 +166,8 @@ int split_base(char* input, BaseReplace* base, int *list_size) {
     
     // We now know the line is well formatted and how many items there will be
     // so we can allocate memory
-    base = malloc(num_items * sizeof(BaseReplace));
-    if (base == NULL) {
+    (*base) = malloc(num_items * sizeof(BaseReplace));
+    if ((*base) == NULL) {
         return 2;
     }
     (*list_size) = num_items;
@@ -188,9 +188,9 @@ int split_base(char* input, BaseReplace* base, int *list_size) {
         if ((process_category == 1) && (isalpha(input[i]) == 0)) {
             
             // Save the current selection
-            base[num_items].type = malloc( ((i - start_pos) + 1) * sizeof(char));
-            strncpy(base[num_items].type, input + start_pos, i - start_pos);
-            base[num_items].type[i-start_pos] = '\0';
+            (*base)[num_items].type = malloc( ((i - start_pos) + 1) * sizeof(char));
+            strncpy((*base)[num_items].type, input + start_pos, i - start_pos);
+            (*base)[num_items].type[i-start_pos] = '\0';
             
             // Start a new item to processr
             start_pos = i;
@@ -205,7 +205,7 @@ int split_base(char* input, BaseReplace* base, int *list_size) {
             strncpy(temp_holder, input + start_pos, i - start_pos);
             temp_holder[i-start_pos] = '\0';
             
-            base[num_items].id = atoi(temp_holder);
+            (*base)[num_items].id = atoi(temp_holder);
             
             // One full item has been processed
             num_items++;
@@ -220,7 +220,7 @@ int split_base(char* input, BaseReplace* base, int *list_size) {
     
     // Need to process the last id
     strncpy(temp_holder, input + start_pos, MAX_CONFIG_LINE);
-    base[num_items].id = atoi(temp_holder);
+    (*base)[num_items].id = atoi(temp_holder);
  
     return 0;
 }
@@ -230,7 +230,7 @@ int split_base(char* input, BaseReplace* base, int *list_size) {
 // Function returns a non-zero value if an error occurs
 //     1 = problem opening the file or malformed ruleset
 //
-int load_base_structures(char *config_filename, char *base_directory, PcfgBase *base_structures) {
+int load_base_structures(char *config_filename, char *base_directory, PcfgBase **base_structures) {
     
     // Get the folder where the files will be saved
     char section_folder[MAX_CONFIG_LINE];
@@ -274,11 +274,11 @@ int load_base_structures(char *config_filename, char *base_directory, PcfgBase *
     int started = 0;
     
     // The base structure we are currently working on
-    base_structures = malloc(sizeof(PcfgBase));
-    if (base_structures == NULL) {
+    (*base_structures) = malloc(sizeof(PcfgBase));
+    if ((*base_structures) == NULL) {
         return 1;
     }
-    PcfgBase *cur_pointer = base_structures;
+    PcfgBase *cur_pointer = (*base_structures);
     cur_pointer->prev = NULL; 
     cur_pointer->next = NULL;
     
@@ -305,7 +305,7 @@ int load_base_structures(char *config_filename, char *base_directory, PcfgBase *
         BaseReplace *base_items;
         int size;
     
-        switch (split_base(value, base_items, &size)) {
+        switch (split_base(value, &base_items, &size)) {
             case 0:
                 // First base_structure
                 if (started == 0) {

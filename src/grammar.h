@@ -98,14 +98,14 @@ typedef struct PcfgBase {
 // Top level structure that contains the PCFG
 typedef struct PcfgGrammar {
    
-    PcfgReplacements *alpha[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *digits[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *other[MAX_TERM_LENGTH + 1 ];
-    PcfgReplacements *keyboard[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *x[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *years[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *capitalization[MAX_TERM_LENGTH + 1];
-    PcfgReplacements *markov[MAX_TERM_LENGTH + 1];
+    PcfgReplacements alpha[MAX_TERM_LENGTH + 1];
+    PcfgReplacements digits[MAX_TERM_LENGTH + 1];
+    PcfgReplacements other[MAX_TERM_LENGTH + 1 ];
+    PcfgReplacements keyboard[MAX_TERM_LENGTH + 1];
+    PcfgReplacements x[MAX_TERM_LENGTH + 1];
+    PcfgReplacements years[MAX_TERM_LENGTH + 1];
+    PcfgReplacements capitalization[MAX_TERM_LENGTH + 1];
+    PcfgReplacements markov[MAX_TERM_LENGTH + 1];
     PcfgBase *base_structures;
     
 }PcfgGrammar;

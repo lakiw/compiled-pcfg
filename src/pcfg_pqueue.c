@@ -49,3 +49,34 @@ int ascending(const void* a, const void* b) {
 
     return 0;
 }
+
+
+// Initialize a PCFG PQueue structure from a PCFG Grammar
+//
+// Returns 0 on successful compleation
+//
+// Returns 1 if an error occured
+// 
+int initialize_pcfg_pqueue(priority_queue_t **pq, PcfgGrammar *pcfg) {
+    
+    // Initialize the priority queue itself
+    (*pq) = priority_queue_init(descending);
+    
+    // Generate all the initial pre-terminals and push them into the pqueue
+    
+    // Keeps track of the current base structure that is being processed
+    PcfgBase *cur_base = pcfg->base_structures;
+    
+    
+    while (cur_base != NULL) {
+
+        for (int i = 0; i< cur_base->size; i++) {
+            printf("(%s:%i) ", cur_base->value[i].type, cur_base->value[i].id);
+        }
+        printf("\n");
+        cur_base = cur_base->next;
+        
+    }
+    
+    return 0;
+}

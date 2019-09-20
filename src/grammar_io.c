@@ -83,9 +83,6 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
     }
     
     // Initalize the first PcfgReplacement
-    if ((terminal_pointer = malloc(sizeof(struct PcfgReplacements))) == NULL) {
-        return 1;
-    } 
     terminal_pointer->parent = NULL;
     terminal_pointer->child = NULL;
     terminal_pointer->prob = previous_prob;
@@ -178,10 +175,11 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
 
 // Loads the grammar for a particular terminal
 //
-// Function returns a non-zero value if an error occurs
-//     1 = problem opening the file or malformed ruleset
+// Function returns 0 if it worked ok
 //
-int load_terminal(char *config_filename, char *base_directory, char *structure, PcfgReplacements *grammar_item[]) {
+// If an error occurs function returns 1
+//
+int load_terminal(char *config_filename, char *base_directory, char *structure, PcfgReplacements grammar_item[]) {
     
     // Get the folder where the files will be saved
     char section_folder[MAX_CONFIG_LINE];
@@ -201,7 +199,7 @@ int load_terminal(char *config_filename, char *base_directory, char *structure, 
 
     //Load each of the files
     for (int i = 0; i< list_size; i++) {
-
+        
         //Find the id for this file, aka A1 vs A23. This is the 1, or 23
         char *end_pos = strchr(result[i],'.');
         
@@ -233,10 +231,9 @@ int load_terminal(char *config_filename, char *base_directory, char *structure, 
         char filename[PATH_MAX];
         snprintf(filename, PATH_MAX, "%s%s%c%s", base_directory,section_folder,SLASH,result[i]);
 
-        if (load_term_from_file(filename, grammar_item[id]) != 0) {
+        if (load_term_from_file(filename, (&grammar_item[id])) != 0) {
             return 1;
         }
-
     }
 
     return 0;
@@ -305,7 +302,6 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
-    
     // Read in the digit terminals 
     if (load_terminal(config_filename, base_directory, "BASE_D", pcfg->digits) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
@@ -317,7 +313,6 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
-    
     // Read in the "other" terminals 
     if (load_terminal(config_filename, base_directory, "BASE_O", pcfg->other) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
@@ -339,7 +334,7 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
     // Now read in the base structures. Note, this doesn't need to be done last
     // but depending on what enhancements are done in the future it's good
     // practice to process these at the end.
-    if (load_base_structures(config_filename, base_directory, pcfg->base_structures) != 0) {
+    if (load_base_structures(config_filename, base_directory, &pcfg->base_structures) != 0) {
         fprintf(stderr, "Error reading the base_structure file in the rules. Exiting\n");
         return 1;
 	}

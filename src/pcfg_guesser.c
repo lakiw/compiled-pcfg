@@ -46,7 +46,9 @@ int main(int argc, char *argv[]) {
     
     load_grammar(argv[0], program_info, &pcfg);
     
-    priority_queue_t* pq = priority_queue_init(descending);
+    priority_queue_t* pq;
+
+    initialize_pcfg_pqueue(&pq, &pcfg);
     
     printf("size of pq now = %d\n", priority_queue_size(pq));
     int weights[] = { 14,8,15,16,11,1,12,13,4,10,9,3,5,7,2,6,6,6 };
@@ -105,6 +107,9 @@ int main(int argc, char *argv[]) {
     }
     printf("size of pq now = %d\n", priority_queue_size(pq));
     priority_queue_free(pq);
+    
+    printf("Test\n");
+    printf("Prob of A[1]:%lf\n",pcfg.alpha[1].prob);
 
 	return 0;
 }

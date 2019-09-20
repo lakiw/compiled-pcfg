@@ -27,8 +27,12 @@
 #define _PCFG_PQUEUE_H
 
 #include <stdlib.h>
+#include <stdio.h>
+#include "grammar.h"
+#include "pqueue.h"
 
 
+// Begin: Example code
 typedef struct {
     int weight;
     char* data;
@@ -40,11 +44,36 @@ typedef struct {
     int weight;
 } edge;
 
+// End: Example code
+
+
+// Parse Tree Item
+//
+// Contains a parse tree and associated probabilities for a PCFG "pre-terminal"
+//
+typedef struct PQItem {
+    
+    // The probability of this item
+    double prob;
+    
+    // The probability of the base_structure that created this
+    double base_prob;
+    
+    // The parse tree itself
+    PcfgReplacements *pt[];
+    
+} PQItem;
+
+
 
 extern int descending(const void* a, const void* b);
 
 
 extern int ascending(const void* a, const void* b);
+
+
+// Intitialize a PCFG PQueue
+extern int initialize_pcfg_pqueue(priority_queue_t **pq, PcfgGrammar *pcfg);
 
 
 #endif

@@ -42,11 +42,11 @@
 //     1 = Base structuer not supported
 //     2 = Error occured processing the input
 //
-extern int split_base(char* input, BaseReplace* base, int *list_size);
+extern int split_base(char* input, BaseReplace **base, int *list_size);
 
 
 // Loads the grammar for base structures
-extern int load_base_structures(char *config_filename, char *base_directory, PcfgBase *base_structures); 
+extern int load_base_structures(char *config_filename, char *base_directory, PcfgBase **base_structures); 
 
 
 #endif
