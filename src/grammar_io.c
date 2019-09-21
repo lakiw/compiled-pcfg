@@ -296,7 +296,7 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
-    
+    printf("Test: %s",pcfg->alpha[3].child->value[1]);
     // Read in the capitalization masks
     if (load_terminal(config_filename, base_directory, "CAPITALIZATION", pcfg->capitalization) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");

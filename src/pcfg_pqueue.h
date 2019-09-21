@@ -28,23 +28,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "grammar.h"
 #include "pqueue.h"
-
-
-// Begin: Example code
-typedef struct {
-    int weight;
-    char* data;
-} element;
-
-
-typedef struct {
-    int vertex;
-    int weight;
-} edge;
-
-// End: Example code
 
 
 // Parse Tree Item
@@ -59,18 +45,18 @@ typedef struct PQItem {
     // The probability of the base_structure that created this
     double base_prob;
     
+    // The number of items in the parse tree
+    int size;
+    
     // The parse tree itself
-    PcfgReplacements *pt[];
+    PcfgReplacements **pt;
     
 } PQItem;
 
 
-
-extern int descending(const void* a, const void* b);
-
-
-extern int ascending(const void* a, const void* b);
-
+// Pops the 'top' element and removes from the priority queue.
+// Will also add children of that item using the deadbeat dad "next" algorithm
+void* pcfg_pq_pop(priority_queue_t *pq);
 
 // Intitialize a PCFG PQueue
 extern int initialize_pcfg_pqueue(priority_queue_t **pq, PcfgGrammar *pcfg);

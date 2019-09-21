@@ -52,9 +52,13 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
     
     // A temporary holder for processing values
     char temp_holder[MAX_CONFIG_LINE];
+    
+    // Used to make sure a section isn't too long
+    int check_length;
        
     // First pass
-    for (int i=0; i< MAX_CONFIG_LINE; i++) {
+    int i;
+    for (i=0; i< MAX_CONFIG_LINE; i++) {
         
         // We have reached the end of the string
         if (input[i] == '\0') {
@@ -94,8 +98,14 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
                 return 1;
             }
             else if (strncmp(temp_holder,"A", MAX_CONFIG_LINE) == 0) {
-            }
-            else if (strncmp(temp_holder,"C", MAX_CONFIG_LINE) == 0) {
+                // Need to add an extra item for the capitalization masks.
+                //
+                // Aka, you'll have an A->cat->ULL->Cat, with ULL being
+                // the capitalization mask
+                //
+                // Basically we're "unrolling" the replacements here
+                // making them flat for faster processing
+                num_items++;
             }
             else if (strncmp(temp_holder,"D", MAX_CONFIG_LINE) == 0) {
             }
@@ -108,6 +118,9 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
             else if (strncmp(temp_holder,"X", MAX_CONFIG_LINE) == 0) {
             }
             // Unknown value was found, error out
+            //
+            // Note, currently not handling "C" for capitalization masks
+            // since they aren't in the base_structures, but are added later
             else {
                 return 2;
             }
@@ -124,11 +137,22 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
                 return 2;
             }
             
+            // Make sure that the section isn't too long
+            strncpy(temp_holder, input + start_pos, i - start_pos);
+            temp_holder[i-start_pos] = '\0';
+            
+            check_length = atoi(temp_holder);
+            // It's too long so bail out
+            if (check_length > MAX_TERM_LENGTH ) {
+                return 1;
+            }
+            
             // One full item has been processed
             num_items++;
             
             // Start a new item to process
-            start_pos = i;   
+            process_category = 1;
+            start_pos = i;  
         }
     }
     
@@ -138,6 +162,16 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
         // Shouldn't need to do this, but just a sanity check
         if (input[start_pos] == '\0') {
             return 2;
+        }
+        
+        // Make sure that the section isn't too long
+        strncpy(temp_holder, input + start_pos, i - start_pos);
+        temp_holder[i-start_pos] = '\0';
+        
+        check_length = atoi(temp_holder);
+        // It's too long so bail out
+        if (check_length > MAX_TERM_LENGTH ) {
+            return 1;
         }
         
         num_items++;
@@ -178,7 +212,7 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
     process_category = 1;
     num_items = 0;
     
-    for (int i=0; i< MAX_CONFIG_LINE; i++) {
+    for (i=0; i< MAX_CONFIG_LINE; i++) {
         // We have reached the end of the string
         if (input[i] == '\0') {
             break;
@@ -207,6 +241,14 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
             
             (*base)[num_items].id = atoi(temp_holder);
             
+            // Check if we need to insert a capitalization mask as well
+            if (strncmp((*base)[num_items].type, "A", MAX_CONFIG_LINE) == 0) {
+                num_items++;
+                (*base)[num_items].type = malloc( 2 * sizeof(char));
+                strncpy((*base)[num_items].type, "C", 2);
+                (*base)[num_items].id = (*base)[num_items-1].id;
+            }
+            
             // One full item has been processed
             num_items++;
             
@@ -221,6 +263,14 @@ int split_base(char* input, BaseReplace **base, int *list_size) {
     // Need to process the last id
     strncpy(temp_holder, input + start_pos, MAX_CONFIG_LINE);
     (*base)[num_items].id = atoi(temp_holder);
+    
+    // Check if we need to insert a capitalization mask as well
+    if (strncmp((*base)[num_items].type, "A", MAX_CONFIG_LINE) == 0) {
+        num_items++;
+        (*base)[num_items].type = malloc( 2 * sizeof(char));
+        strncpy((*base)[num_items].type, "C", 2);
+        (*base)[num_items].id = (*base)[num_items-1].id;
+    }
  
     return 0;
 }
