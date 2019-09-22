@@ -28,10 +28,11 @@
 
 // Opens a file and actually loads the grammar for a particular terminal
 //
-// Function returns a non-zero value if an error occurs
-//     1 = problem opening the file or malformed ruleset
+// Function returns a a PcfgReplacements structure
+// 
+// Returns NULL if problems occur opening the file or malformed ruleset
 //
-int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
+PcfgReplacements* load_term_from_file(char *filename) {
     
     // Pointer to the open terminal file
     FILE *fp;
@@ -44,7 +45,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
         
         //Could not open the file. Print error and return an error
         fprintf(stderr, "Error. Could not read the file: %s\n",filename);
-        return 1;
+        return NULL;
     }
     
     // Note: There will be two passes through the file
@@ -61,7 +62,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
     // Initalize things and get the first line of the file
     if (!fgets(buff, MAX_CONFIG_LINE , (FILE*)fp)) {
         // The file should have at least one line in it
-        return 1;
+        return NULL;
     }
     
     // This contains the number of items at the current probability
@@ -79,10 +80,14 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
     // Break up the first line. Using previous_prob since this will be the
     // inital value for it when comparing against other items.
     if (split_value(buff, value, &previous_prob) != 0) {
-        return 1;
+        return NULL;
     }
     
     // Initalize the first PcfgReplacement
+    PcfgReplacements *terminal_pointer = (PcfgReplacements *)malloc(sizeof(struct PcfgReplacements));
+    if (terminal_pointer == NULL) {
+        return NULL;
+    }
     terminal_pointer->parent = NULL;
     terminal_pointer->child = NULL;
     terminal_pointer->prob = previous_prob;
@@ -93,7 +98,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
     while (fgets(buff, MAX_CONFIG_LINE , (FILE*)fp)) {
         
         if (split_value(buff, value, &prob) != 0) {
-            return 1;
+            return NULL;
         }
         
         if (prob == previous_prob) {
@@ -103,16 +108,16 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
             // Finalize this structure
             cur_pointer->size = num_term;
             if ((cur_pointer->value = (char **) malloc(num_term * sizeof(char *))) == NULL) {
-                return 1;
+                return NULL;
             }
 
             // intialize the next, and make it current
             previous_prob = prob;
             num_term = 1;
             
-            cur_pointer->child = malloc(sizeof(struct PcfgReplacements));
+            cur_pointer->child = (PcfgReplacements *)malloc(sizeof(struct PcfgReplacements));
             if (cur_pointer->child == NULL) {
-                return 1;
+                return NULL;
             }
             
             cur_pointer->child->parent = cur_pointer;
@@ -125,7 +130,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
     //Save the size of the last items
     cur_pointer->size = num_term;
     if ((cur_pointer->value = (char **) malloc(num_term * sizeof(char *))) == NULL) {
-        return 1;
+        return NULL;
     }
     
     // Now on to the second loop where we will save all of the items
@@ -133,7 +138,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
     // Reset the file pointer to the start of the file
     if (fseek(fp, 0, SEEK_SET) != 0) {
         fprintf(stderr, "Error. Could not seek in: %s\n",filename);
-        return 1;
+        return NULL;
     }
     cur_pointer = terminal_pointer;
     num_term = 0;
@@ -148,12 +153,12 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
         
         if (split_value(buff, value, &prob) != 0) {
             fprintf(stderr, "Error. Could not split value in rules file\n");
-            return 1;
+            return NULL;
         }
         // Sanity checking
         if (prob != cur_pointer->prob) {
             fprintf(stderr, "Error. Probability mismatch in rules file\n");
-            return 1;
+            return NULL;
         }
         
         // Save the actual value
@@ -161,7 +166,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
 
         cur_pointer->value[num_term] = malloc((value_len +1) * sizeof(char *));
         if (cur_pointer->value[num_term] == NULL) {
-            return 1;
+            return NULL;
         }
         strncpy(cur_pointer->value[num_term], value, value_len +1);
         
@@ -169,7 +174,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
         
     }
     
-    return 0;
+    return terminal_pointer;
 }
 
 
@@ -179,7 +184,7 @@ int load_term_from_file(char *filename, PcfgReplacements *terminal_pointer) {
 //
 // If an error occurs function returns 1
 //
-int load_terminal(char *config_filename, char *base_directory, char *structure, PcfgReplacements grammar_item[]) {
+int load_terminal(char *config_filename, char *base_directory, char *structure, PcfgReplacements *grammar_item[]) {
     
     // Get the folder where the files will be saved
     char section_folder[MAX_CONFIG_LINE];
@@ -199,7 +204,7 @@ int load_terminal(char *config_filename, char *base_directory, char *structure, 
 
     //Load each of the files
     for (int i = 0; i< list_size; i++) {
-        
+
         //Find the id for this file, aka A1 vs A23. This is the 1, or 23
         char *end_pos = strchr(result[i],'.');
         
@@ -230,10 +235,13 @@ int load_terminal(char *config_filename, char *base_directory, char *structure, 
         
         char filename[PATH_MAX];
         snprintf(filename, PATH_MAX, "%s%s%c%s", base_directory,section_folder,SLASH,result[i]);
-
-        if (load_term_from_file(filename, (&grammar_item[id])) != 0) {
+        
+        grammar_item[id] = load_term_from_file(filename);
+        
+        if (grammar_item[id] == NULL) {
             return 1;
         }
+
     }
 
     return 0;
@@ -296,7 +304,7 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
-    printf("Test: %s",pcfg->alpha[3].child->value[1]);
+
     // Read in the capitalization masks
     if (load_terminal(config_filename, base_directory, "CAPITALIZATION", pcfg->capitalization) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");

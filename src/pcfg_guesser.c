@@ -46,11 +46,18 @@ int main(int argc, char *argv[]) {
     
     
     // Intiazlie the grammar and Priority Queue
-    load_grammar(argv[0], program_info, &pcfg);
+    if (load_grammar(argv[0], program_info, &pcfg) != 0) {
+        fprintf(stderr, "Error loading ruleset. Exiting\n");
+        return 0;
+	}
+
+    fprintf(stderr, "Initailizing the Priority Queue\n");
     priority_queue_t* pq;
+
     initialize_pcfg_pqueue(&pq, &pcfg);
     
-    printf("Test: %s",pcfg.alpha[3].child->value[1]);
+    fprintf(stderr, "Starting to generate guesses\n");
+
     // Start generating guesses
     while (!priority_queue_empty(pq)) {
         PQItem* pq_item = pcfg_pq_pop(pq);
@@ -58,7 +65,6 @@ int main(int argc, char *argv[]) {
             printf("Memory allocation error when popping item from pqueue\n");
             return 1;
         }
-        //printf("top is: %e\n", pq_item->prob);
         free(pq_item->pt);
         free(pq_item);
     }
