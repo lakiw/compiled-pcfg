@@ -4,8 +4,6 @@
 //  --Probabilistic Context Free Grammar (PCFG) Password Guessing Program
 //
 //  Written by Matt Weir
-//  Original backend priority queue code taken from stackexchange user arcomber
-//  https://codereview.stackexchange.com/questions/186670/priority-queue-implementation-in-c-based-on-heap-ordered-resizable-array-tak
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License

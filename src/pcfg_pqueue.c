@@ -4,8 +4,6 @@
 //  --Probabilistic Context Free Grammar (PCFG) Password Guessing Program
 //
 //  Written by Matt Weir
-//  Original backend priority queue code taken from stackexchange user arcomber
-//  https://codereview.stackexchange.com/questions/186670/priority-queue-implementation-in-c-based-on-heap-ordered-resizable-array-tak
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -53,6 +51,21 @@ void calculate_prob(PQItem *pq_item) {
 }
 
 
+// Calculates a parse tree's probability
+//
+// Note, this is slightly lighter weight than the calculate_prob function
+// since it doesn't have to take into account the base_probability
+double calc_pt_prob(PcfgReplacements **pt, int size) {
+    
+    double prob = 1.0;
+    
+    for (int i = 0; i < size; i++) {
+        prob *= pt[i]->prob;
+    }
+    return prob;
+}
+
+
 // Checks to see if the current parent should handle this child, or if
 // there is a lower probability parent still in the PQ that will handle
 // the child later
@@ -74,7 +87,44 @@ int is_this_my_child(int parent_id , PQItem *parent_pq) {
         return 2;
     }   
     child_pt[parent_id] = child_pt[parent_id]->child;
+
+    // Now generate the other parents and see if they are lower probabilty
+    // than the current parent
+    for (int i=0; i<parent_pq->size; i++) {
+        // Skip the current parent
+        if (i == parent_id) {
+            continue;
+        }
         
+        // Skip if there isn't a parent for this position
+        if (child_pt[i]->parent == NULL) {
+            continue;
+        }
+        
+        // Check this parent's probability
+        // Modify the child's pt to be the new parent
+        child_pt[i] = child_pt[i]->parent;
+        
+        //Calculate the new parent's probability
+        double new_parent_prob = calc_pt_prob(child_pt, parent_pq->size);
+        
+        // If the new parent's probability is less than the current parent,
+        // then this child is the new parent's responsibilty
+        if (new_parent_prob < parent_pq->prob) {
+            return 1;
+        }
+        
+        // If the parent's probability is equal, the one to the leftmost is
+        // responsible. It's arbitrary, but we need a tiebreaker
+        if ((new_parent_prob == parent_pq->prob) && (i < parent_id)) {
+            return 1;
+        }
+        
+        // The new parent is not responsible for this child, so reset the child
+        // to be itself
+        child_pt[i] = child_pt[i]->child;
+    }
+               
     //TODO, not done with this yet
     return 0;
 }

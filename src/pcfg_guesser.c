@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
             printf("Memory allocation error when popping item from pqueue\n");
             return 1;
         }
+        //printf("Popped: %e\n",pq_item->prob);
         free(pq_item->pt);
         free(pq_item);
     }
