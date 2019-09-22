@@ -26,6 +26,19 @@
 #include "pcfg_guesser.h"
 
 
+// Generates guesses from a parse_tree
+void  generate_guesses(PQItem *pq_item) {
+    
+    //Placeholder, just generate the first guesses
+    for (int i=0; i < pq_item->size; i++) {
+        printf("%s",pq_item->pt[i]->value[0]);
+    }
+    printf("\n");
+     
+}
+
+
+
 // The main program
 int main(int argc, char *argv[]) {
 	
@@ -65,7 +78,9 @@ int main(int argc, char *argv[]) {
             printf("Memory allocation error when popping item from pqueue\n");
             return 1;
         }
-        //printf("Popped: %e\n",pq_item->prob);
+        
+        generate_guesses(pq_item);
+        
         free(pq_item->pt);
         free(pq_item);
     }

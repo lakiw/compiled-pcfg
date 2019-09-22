@@ -76,6 +76,15 @@ double calc_pt_prob(PcfgReplacements **pt, int size) {
 //
 int is_this_my_child(int parent_id , PQItem *parent_pq) {
     
+    // Not sure if it makes sense to recalculate the popped parent's prob
+    // without the base_structure prob so that doesn't need to be included in
+    // potential parent calculations, or to include the base_structure prob in
+    // all comparisions.
+    //
+    // Going with coming up with a stripped down version of the parent's prob
+    // for comparisions now
+    double popped_parent_prob = calc_pt_prob(parent_pq->pt, parent_pq->size);
+    
     // Create the potential child's parse tree       
     PcfgReplacements *child_pt[parent_pq->size];
     for (int i=0; i<parent_pq->size; i++) {
@@ -110,13 +119,13 @@ int is_this_my_child(int parent_id , PQItem *parent_pq) {
         
         // If the new parent's probability is less than the current parent,
         // then this child is the new parent's responsibilty
-        if (new_parent_prob < parent_pq->prob) {
+        if (new_parent_prob < popped_parent_prob) {
             return 1;
         }
         
         // If the parent's probability is equal, the one to the leftmost is
         // responsible. It's arbitrary, but we need a tiebreaker
-        if ((new_parent_prob == parent_pq->prob) && (i < parent_id)) {
+        if ((new_parent_prob == popped_parent_prob) && (i < parent_id)) {
             return 1;
         }
         
@@ -125,10 +134,8 @@ int is_this_my_child(int parent_id , PQItem *parent_pq) {
         child_pt[i] = child_pt[i]->child;
     }
                
-    //TODO, not done with this yet
     return 0;
 }
-
 
 
 // Pops the 'top' element and removes from the priority queue.
@@ -172,9 +179,7 @@ void* pcfg_pq_pop(priority_queue_t* pq) {
             }
             // Advance the parse tree of the child so it is an actual child
             // of the parent
-            if (child->pt[i]->child != NULL) {
-                child->pt[i] = child->pt[i]->child;
-            }
+            child->pt[i] = child->pt[i]->child;
             
             //calculate the probability of the pq_item
             calculate_prob(child);
@@ -183,7 +188,6 @@ void* pcfg_pq_pop(priority_queue_t* pq) {
         }
     }
             
-
     return pq_item;
 }
  
