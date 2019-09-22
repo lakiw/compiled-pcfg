@@ -26,14 +26,46 @@
 #include "pcfg_guesser.h"
 
 
+void recursive_guess(PQItem *pq_item, int base_pos, char *cur_guess, int start_point) {
+    
+    int new_start = start_point;
+    
+    for (int i = 0; i < pq_item->pt[base_pos]->size; i++) {
+         
+        // This is a capitalization section
+        if (strncmp(pq_item->pt[base_pos]->type,"C",2) == 0) {
+            
+        }
+        else {
+            strncpy(cur_guess + start_point, pq_item->pt[base_pos]->value[i], MAX_GUESS_SIZE - start_point);
+            new_start = strnlen(cur_guess, MAX_GUESS_SIZE);
+        }
+        
+        // If this is the last item, generate a guess
+        if (base_pos == (pq_item->size - 1)) {
+            printf("%s\n",cur_guess);
+        }
+        // Not the last item so doing this recursivly
+        else {
+            recursive_guess(pq_item, base_pos +1, cur_guess, new_start);
+        }
+    }      
+    return;
+}
+
+
 // Generates guesses from a parse_tree
 void  generate_guesses(PQItem *pq_item) {
     
+    char guess[MAX_GUESS_SIZE];
+    
+    recursive_guess(pq_item, 0, guess, 0);
+    
     //Placeholder, just generate the first guesses
-    for (int i=0; i < pq_item->size; i++) {
-        printf("%s",pq_item->pt[i]->value[0]);
-    }
-    printf("\n");
+    //for (int i=0; i < pq_item->size; i++) {
+        //printf("%s%li ",pq_item->pt[i]->type, pq_item->pt[i]->id);
+    //}
+    //printf("\n");
      
 }
 

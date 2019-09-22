@@ -32,7 +32,7 @@
 // 
 // Returns NULL if problems occur opening the file or malformed ruleset
 //
-PcfgReplacements* load_term_from_file(char *filename) {
+PcfgReplacements* load_term_from_file(char *filename, char *type, long id) {
     
     // Pointer to the open terminal file
     FILE *fp;
@@ -91,6 +91,16 @@ PcfgReplacements* load_term_from_file(char *filename) {
     terminal_pointer->parent = NULL;
     terminal_pointer->child = NULL;
     terminal_pointer->prob = previous_prob;
+    terminal_pointer->id = id;
+    
+    // Allocate memory to store the type
+    int type_len = strnlen(type,50);
+    type_len += 1;
+    terminal_pointer->type = (char *)malloc(type_len * sizeof(char *));
+    if (terminal_pointer->type == NULL) {
+        return NULL;
+    }
+    strncpy(terminal_pointer->type, type, type_len);
     
     PcfgReplacements *cur_pointer = terminal_pointer;
         
@@ -124,6 +134,14 @@ PcfgReplacements* load_term_from_file(char *filename) {
             cur_pointer = cur_pointer->child;
             cur_pointer->child = NULL;
             cur_pointer->prob = prob;
+            cur_pointer->id = id;
+    
+            // Allocate memory to store the type
+            cur_pointer->type = (char *)malloc(type_len * sizeof(char *));
+            if (cur_pointer->type == NULL) {
+                return NULL;
+            }
+            strncpy(cur_pointer->type, type, type_len);
         }
     }
     
@@ -184,7 +202,7 @@ PcfgReplacements* load_term_from_file(char *filename) {
 //
 // If an error occurs function returns 1
 //
-int load_terminal(char *config_filename, char *base_directory, char *structure, PcfgReplacements *grammar_item[]) {
+int load_terminal(char *config_filename, char *base_directory, char *structure, char *type, PcfgReplacements *grammar_item[]) {
     
     // Get the folder where the files will be saved
     char section_folder[MAX_CONFIG_LINE];
@@ -236,7 +254,7 @@ int load_terminal(char *config_filename, char *base_directory, char *structure, 
         char filename[PATH_MAX];
         snprintf(filename, PATH_MAX, "%s%s%c%s", base_directory,section_folder,SLASH,result[i]);
         
-        grammar_item[id] = load_term_from_file(filename);
+        grammar_item[id] = load_term_from_file(filename, type, id);
         
         if (grammar_item[id] == NULL) {
             return 1;
@@ -300,41 +318,41 @@ int load_grammar(char *arg_exec, struct program_info program_info, PcfgGrammar *
     }
     
     // Read in the alpha terminals
-    if (load_terminal(config_filename, base_directory, "BASE_A", pcfg->alpha) != 0) {
+    if (load_terminal(config_filename, base_directory, "BASE_A", "A", pcfg->alpha) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
 
     // Read in the capitalization masks
-    if (load_terminal(config_filename, base_directory, "CAPITALIZATION", pcfg->capitalization) != 0) {
+    if (load_terminal(config_filename, base_directory, "CAPITALIZATION", "C", pcfg->capitalization) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
     // Read in the digit terminals 
-    if (load_terminal(config_filename, base_directory, "BASE_D", pcfg->digits) != 0) {
+    if (load_terminal(config_filename, base_directory, "BASE_D", "D", pcfg->digits) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
     
     // Read in the years terminals 
-    if (load_terminal(config_filename, base_directory, "BASE_Y", pcfg->years) != 0) {
+    if (load_terminal(config_filename, base_directory, "BASE_Y", "Y", pcfg->years) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
     // Read in the "other" terminals 
-    if (load_terminal(config_filename, base_directory, "BASE_O", pcfg->other) != 0) {
+    if (load_terminal(config_filename, base_directory, "BASE_O", "O", pcfg->other) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
     
     // Read in the conteXt sensitive terminals
-    if (load_terminal(config_filename, base_directory, "BASE_X", pcfg->x) != 0) {
+    if (load_terminal(config_filename, base_directory, "BASE_X", "X", pcfg->x) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}
     
     // Read in the keyboard combo terminals
-    if (load_terminal(config_filename, base_directory, "BASE_K", pcfg->keyboard) != 0) {
+    if (load_terminal(config_filename, base_directory, "BASE_K", "K", pcfg->keyboard) != 0) {
         fprintf(stderr, "Error reading the rules file. Exiting\n");
         return 1;
 	}

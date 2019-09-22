@@ -50,6 +50,15 @@ typedef struct PcfgReplacements {
     
     // The values for this terminal
     char **value;
+    
+    // These are used for quick guess generation and debugging
+    // (type/id)
+    
+    // The type of structure this is
+    char *type;
+    
+    // The id for this structure
+    long id;
         
 }PcfgReplacements;
 
