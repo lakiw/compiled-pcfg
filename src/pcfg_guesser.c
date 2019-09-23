@@ -33,7 +33,30 @@ void recursive_guess(PQItem *pq_item, int base_pos, char *cur_guess, int start_p
     for (int i = 0; i < pq_item->pt[base_pos]->size; i++) {
          
         // This is a capitalization section
+        
         if (strncmp(pq_item->pt[base_pos]->type,"C",2) == 0) {
+            // Go backward to the previous section and apply the mask
+            // Note, if someone messed with the ruleset this could cause issues, so
+            // need to do some sanity checking on the bounds
+            int mask_len = strnlen(pq_item->pt[base_pos]->value[i], MAX_TERM_LENGTH + 1);
+            //Sanity check on length
+            if (mask_len > start_point) {
+                fprintf(stderr, "Error with the capitalization masks\n");
+                return;
+            }
+            
+            // I'm pretty sure this isn't going to be sufficient for UTF-8
+            // characters, but that's a rabbit hole I'm going to have to dive
+            // into at a later point.
+            for (int y=0; y< mask_len; y++) {
+                //lowercase the letter
+                if (pq_item->pt[base_pos]->value[i][y] == 'L') {
+                    cur_guess[start_point - mask_len + y] = tolower(cur_guess[start_point - mask_len + y]);
+                }
+                else {
+                    cur_guess[start_point - mask_len + y] = toupper(cur_guess[start_point - mask_len + y]);
+                }
+            }
             
         }
         else {
@@ -56,17 +79,17 @@ void recursive_guess(PQItem *pq_item, int base_pos, char *cur_guess, int start_p
 
 // Generates guesses from a parse_tree
 void  generate_guesses(PQItem *pq_item) {
-    
-    char guess[MAX_GUESS_SIZE];
-    
-    recursive_guess(pq_item, 0, guess, 0);
-    
-    //Placeholder, just generate the first guesses
-    //for (int i=0; i < pq_item->size; i++) {
-        //printf("%s%li ",pq_item->pt[i]->type, pq_item->pt[i]->id);
+       
+    //Used for debugging
+    //int i;
+    //for (i=0; i < pq_item->size; i++) {
+    //    printf("%s%li ",pq_item->pt[i]->type, pq_item->pt[i]->id);
     //}
     //printf("\n");
-     
+    
+    char guess[MAX_GUESS_SIZE];
+    recursive_guess(pq_item, 0, guess, 0);
+
 }
 
 
