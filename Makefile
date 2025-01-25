@@ -1,1 +1,1 @@
-include src/Makefile
+include src/makefile
